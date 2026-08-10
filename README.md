@@ -4,7 +4,7 @@
 
 > Made with ❤️ by **Rajdeep Das** (Dept. of CSE-AIML, IEM-UEM Kolkata) for the students of the **Institute of Engineering and Management, Kolkata** — because every existing requirements tool worth using (ReqView, Jama, DOORS, Helix RM…) is paid, and students shouldn't have to pay to learn how to write proper requirements.
 
-**Live demo:** `https://<your-username>.github.io/<repo-name>/` *(update after deploying — see [Deployment](#-deployment))*
+**Live demo:** `https://drajdeep.github.io/SRS-Studio-IEM/` *(update after deploying — see [Deployment](#-deployment))*
 
 ---
 
