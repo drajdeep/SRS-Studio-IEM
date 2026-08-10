@@ -4,7 +4,7 @@
 
 > Made with ❤️ by **Rajdeep Das** (Dept. of CSE-AIML, IEM-UEM Kolkata) for the students of the **Institute of Engineering and Management, Kolkata** — because every existing requirements tool worth using (ReqView, Jama, DOORS, Helix RM…) is paid, and students shouldn't have to pay to learn how to write proper requirements.
 
-**Live demo:** `https://drajdeep.github.io/SRS-Studio-IEM/` *(update after deploying — see [Deployment](#-deployment))*
+**Live demo:** `https://drajdeep.github.io/SRS-Studio-IEM/` 
 
 ---
 
@@ -107,18 +107,8 @@ Every export opens with a **title page**: institute banner, project name, docume
 
 ---
 
-## 🚀 Deployment
-
-### GitHub Pages (recommended, free)
-1. Create a **public** repository and upload the contents of this folder (`index.html`, `README.md`, `LICENSE`).
-2. Go to **Settings → Pages → Build and deployment**.
-3. Source: **Deploy from a branch** → Branch: `main` → Folder: `/ (root)` → **Save**.
-4. Your app is live in ~1 minute at `https://<username>.github.io/<repo>/`. Share that link with students.
-
-Also works on **Netlify Drop**, **Cloudflare Pages**, **Vercel**, or any static host — just serve `index.html`.
-
 ### Run locally
-Double-click `index.html`. That's it.
+Download repo and Double-click `index.html`. That's it.
 
 ---
 
