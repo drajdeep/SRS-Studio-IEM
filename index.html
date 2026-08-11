@@ -23,7 +23,7 @@ textarea,input,select{font-family:var(--sans);font-size:13px;color:var(--ink)}
 
 /* ── Institute banner ─────────────── */
 #banner{background:#fff;border-bottom:1px solid var(--line);text-align:center;padding:6px 10px}
-#banner img{max-width:500px;width:100%;height:auto;display:inline-block}
+#banner img{max-width:600px;width:100%;height:auto;display:inline-block}
 
 /* ── Toolbar ─────────────────────────── */
 #toolbar{display:flex;align-items:center;gap:8px;height:52px;padding:0 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:nowrap}
@@ -142,6 +142,11 @@ td.rid{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent
 <div id="toolbar">
   <div id="brand"><b>SRS Studio</b><span>ISO/IEC/IEEE 29148</span></div>
   <input id="doctitle" title="Project / system name" placeholder="Project name…">
+  <div class="tb-group">
+    <button class="btn" id="b-new" title="Start a blank SRS">New</button>
+    <button class="btn" id="b-undo" title="Undo (Ctrl+Z)">↺ Undo</button>
+    <button class="btn" id="b-redo" title="Redo (Ctrl+Y)">↻ Redo</button>
+  </div>
   <div class="tb-group">
     <button class="btn" id="b-meta">Document info</button>
     <button class="btn" id="b-open">Open JSON</button>
@@ -278,8 +283,69 @@ function persist(){
   try{ localStorage.setItem("srs-studio-v2",JSON.stringify(doc));
     document.getElementById("savestate").textContent="saved locally · "+new Date().toLocaleTimeString();
   }catch(e){ document.getElementById("savestate").textContent="⚠ browser storage full — use Save JSON"; }
+  recordHistory();
 }
 function touch(){ clearTimeout(saveTimer); saveTimer=setTimeout(persist,400); }
+
+/* ── undo / redo history ── */
+let histPast=[], histFuture=[], histFreeze=false;
+function histLimit(json){ return json.length>2_000_000 ? 12 : 50; } // fewer snapshots for image-heavy docs
+function recordHistory(){
+  if(histFreeze) return;
+  const snap=JSON.stringify(doc);
+  if(histPast.length && histPast[histPast.length-1]===snap) return;
+  histPast.push(snap); histFuture=[];
+  const lim=histLimit(snap);
+  while(histPast.length>lim) histPast.shift();
+  updateHistBtns();
+}
+function applyState(json){
+  histFreeze=true;
+  doc=JSON.parse(json); sanitize();
+  if(curSec>=doc.secs.length) curSec=doc.secs.length-1;
+  curReq=null;
+  document.getElementById("doctitle").value=doc.meta.project||"";
+  renderAll();
+  try{ localStorage.setItem("srs-studio-v2",json); }catch(e){}
+  document.getElementById("savestate").textContent="saved locally · "+new Date().toLocaleTimeString();
+  histFreeze=false;
+  updateHistBtns();
+}
+function undo(){
+  clearTimeout(saveTimer);
+  if(histPast.length<2) return;               // [0] is current state
+  histFuture.push(histPast.pop());
+  applyState(histPast[histPast.length-1]);
+}
+function redo(){
+  clearTimeout(saveTimer);
+  if(!histFuture.length) return;
+  const s=histFuture.pop(); histPast.push(s);
+  applyState(s);
+}
+function updateHistBtns(){
+  document.getElementById("b-undo").disabled = histPast.length<2;
+  document.getElementById("b-redo").disabled = !histFuture.length;
+  document.getElementById("b-undo").style.opacity = histPast.length<2 ? .45 : 1;
+  document.getElementById("b-redo").style.opacity = !histFuture.length ? .45 : 1;
+}
+document.getElementById("b-undo").onclick=undo;
+document.getElementById("b-redo").onclick=redo;
+document.addEventListener("keydown",e=>{
+  const tag=(e.target.tagName||"").toLowerCase();
+  const inField = tag==="input"||tag==="textarea"||tag==="select";
+  if(inField) return;   // let the browser's native text-undo work inside fields
+  if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key.toLowerCase()==="z"){ e.preventDefault(); undo(); }
+  else if((e.ctrlKey||e.metaKey) && (e.key.toLowerCase()==="y" || (e.shiftKey && e.key.toLowerCase()==="z"))){ e.preventDefault(); redo(); }
+});
+
+/* ── new blank project ── */
+document.getElementById("b-new").onclick=()=>{
+  if(!confirm("Start a new blank SRS?\n\nYour current project will be replaced. If you haven't downloaded it, click Cancel and use “Save JSON” first."))return;
+  doc=blank(); curSec=0; curReq=null;
+  document.getElementById("doctitle").value="";
+  renderAll(); persist();
+};
 
 /* ───────────────────────── numbering ───────────────────────── */
 function numbering(){
